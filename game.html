@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>6x6 Puzzle Game</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: #f0f8ff;
+    }
+    h2 {
+      margin-bottom: 20px;
+      color: #333;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(6, 80px);
+      grid-gap: 10px;
+    }
+    .card {
+      width: 80px;
+      height: 80px;
+      background: #87ceeb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      cursor: pointer;
+      border-radius: 8px;
+      user-select: none;
+    }
+    .hidden {
+      background: #4682b4;
+    }
+    .matched {
+      background: white;
+      cursor: default;
+    }
+    .result {
+      margin-top: 20px;
+      font-size: 20px;
+      color: green;
+      text-align: center;
+      display: none;
+    }
+    .result img {
+      margin-top: 50px;
+      width: 500px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Solve this Puzzle 🧩</h2>
+  <div class="grid" id="grid"></div>
+  <div class="result" id="result">
+    <p>Super! 🎉 Here is your next hint 👇</p>
+    <img src="duster.jpeg" alt="Tiger Hint">
+  </div>
+
+  <script>
+    const emojis = ["🍎","🍌","🍇","🍉","🍒","🍍","🥭","🍓",
+                    "🐶","🐱","🐯","🦁","🐵","🐰","🐼","🐸",
+                    "⚽","🏀","🏈","⚾","🎾","🏐","🎱","🥎",
+                    "🚗","🚌","🚲","🚀","✈️","🚤","🚉","🏍️",
+                    "🍔","🍕","🌭","🍟","🥗","🍩"];
+
+    let cards = [...emojis, ...emojis]; // 36*2 = 72? no we need 36 for 6x6
+    cards = emojis.slice(0,18); // take 18 unique
+    cards = [...cards, ...cards]; // 36 cards total
+
+    cards.sort(() => 0.5 - Math.random());
+
+    const grid = document.getElementById("grid");
+    const result = document.getElementById("result");
+
+    let firstCard = null;
+    let lock = false;
+    let matchedCount = 0;
+
+    cards.forEach((emoji, index) => {
+      const card = document.createElement("div");
+      card.classList.add("card", "hidden");
+      card.dataset.emoji = emoji;
+      card.dataset.index = index;
+
+      card.addEventListener("click", () => {
+        if (lock || card.classList.contains("matched") || card.textContent) return;
+
+        card.textContent = emoji;
+        card.classList.remove("hidden");
+
+        if (!firstCard) {
+          firstCard = card;
+        } else {
+          if (firstCard.dataset.emoji === card.dataset.emoji) {
+            firstCard.classList.add("matched");
+            card.classList.add("matched");
+            firstCard = null;
+            matchedCount += 2;
+
+            if (matchedCount === cards.length) {
+              result.style.display = "block";
+            }
+          } else {
+            lock = true;
+            setTimeout(() => {
+              firstCard.textContent = "";
+              card.textContent = "";
+              firstCard.classList.add("hidden");
+              card.classList.add("hidden");
+              firstCard = null;
+              lock = false;
+            }, 800);
+          }
+        }
+      });
+
+      grid.appendChild(card);
+    });
+  </script>
+</body>
+</html>
